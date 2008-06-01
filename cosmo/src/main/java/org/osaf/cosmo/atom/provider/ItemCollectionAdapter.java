@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 package org.osaf.cosmo.atom.provider;
-//git test
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -94,7 +94,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
 
     // Provider methods
     private static final String[] ALLOWED_COLL_METHODS =
-        new String[] { "GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS" };
+        new String[] { "GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS" }; // [*] add "SEARCH"
     private static final String[] ALLOWED_ENTRY_METHODS =
         new String[] { "GET", "HEAD", "PUT", "OPTIONS" };
 
@@ -342,7 +342,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         return super.postMedia(request);
     }
 
-    public ResponseContext getFeed(RequestContext request) {
+    public ResponseContext getFeed(RequestContext request) {  // [*]  good basis for Search method?
         CollectionTarget target = (CollectionTarget) request.getTarget();
         CollectionItem collection = target.getCollection();
         if (log.isDebugEnabled())
@@ -378,7 +378,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         if (log.isDebugEnabled())
             log.debug("getting entry for item " + item.getUid());
 
-        try {
+        try {  // [*] how is this getting the entry? - must look into 'RequestContext'
             ServiceLocator locator = createServiceLocator(request);
             ItemFeedGenerator generator =
                 createItemFeedGenerator(target, locator);
@@ -413,7 +413,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
             return frc;
 
         try {
-            CollectionItem content = readCollection(request);
+            CollectionItem content = readCollection(request); // [*] readCollection(request)
 
             CollectionItem collection = getEntityFactory().createCollection();
             collection.setUid(content.getUid());
@@ -549,7 +549,9 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         return rc;
     }
 
-    protected ResponseContext addItemToCollection(RequestContext request) {
+
+    public ResponseContext addItemToCollection(RequestContext request) {
+                                                                         
         CollectionTarget target = (CollectionTarget) request.getTarget();
         CollectionItem collection = target.getCollection();
         if (log.isDebugEnabled())
@@ -660,7 +662,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         return processorFactory.createProcessor(mediaType);
     }
 
-    protected NoteItemFilter createQueryFilter(RequestContext request)
+    protected NoteItemFilter createQueryFilter(RequestContext request) //  [*]
         throws InvalidQueryException {
         boolean requiresFilter = false;
         EventStampFilter eventFilter = new EventStampFilter();
