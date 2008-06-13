@@ -94,7 +94,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
 
     // Provider methods
     private static final String[] ALLOWED_COLL_METHODS =
-        new String[] { "GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS" }; // [*] add "SEARCH"
+        new String[] { "GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS" }; 
     private static final String[] ALLOWED_ENTRY_METHODS =
         new String[] { "GET", "HEAD", "PUT", "OPTIONS" };
 
@@ -342,7 +342,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         return super.postMedia(request);
     }
 
-    public ResponseContext getFeed(RequestContext request) {  // [*]  good basis for Search method?
+    public ResponseContext getFeed(RequestContext request) {  
         CollectionTarget target = (CollectionTarget) request.getTarget();
         CollectionItem collection = target.getCollection();
         if (log.isDebugEnabled())
@@ -662,6 +662,17 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         return processorFactory.createProcessor(mediaType);
     }
 
+    protected BodySearchFilter createBodySearchFilter(RequestContext request){
+    	BodySearchFilter searchFilter = new BodySearchFilter();
+    	
+    	try{
+    		String query = getParameter(request, "bodyQuery");
+    	}
+    	
+    	searchFilter.setSearchQuery(query);
+    	
+    }
+    
     protected NoteItemFilter createQueryFilter(RequestContext request) //  [*]
         throws InvalidQueryException {
         boolean requiresFilter = false;
