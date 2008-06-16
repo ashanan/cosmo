@@ -662,15 +662,11 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         return processorFactory.createProcessor(mediaType);
     }
 
-    protected BodySearchFilter createBodySearchFilter(RequestContext request){
-    	BodySearchFilter searchFilter = new BodySearchFilter();
-    	
-    	try{
-    		String query = getParameter(request, "bodyQuery");
-    	}
-    	
-    	searchFilter.setSearchQuery(query);
-    	
+    protected NoteItemFilter createBodySearchFilter(RequestContext request){
+        String query = getParameter(request, "bodyQuery");
+	NoteItemFilter searchFilter = new NoteItemFilter();
+	searchFilter.setBody(Restricitions.like(query))
+	return searchFilter;
     }
     
     protected NoteItemFilter createQueryFilter(RequestContext request) //  [*]
