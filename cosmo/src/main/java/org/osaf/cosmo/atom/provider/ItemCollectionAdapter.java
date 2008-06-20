@@ -788,6 +788,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         throws InvalidQueryException {
         boolean requiresFilter = false;
         EventStampFilter eventFilter = new EventStampFilter();
+        String searchType = getNonEmptyParameter(request, "searchType");	
 
         try {
             java.util.Date start = getDateParameter(request, "start");
@@ -824,6 +825,55 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         itemFilter.getStampFilters().add(eventFilter);
 
         return itemFilter;
+=======
+        if(searchType == null){
+ 	       try {
+	            java.util.Date start = getDateParameter(request, "start");
+        	    java.util.Date end = getDateParameter(request, "end");
+
+            	if ((start == null && end != null) ||
+                	(start != null && end == null))
+               	 throw new InvalidQueryException("Both start and end parameters must be provided for a time-range query");
+
+           	 if (start != null && end != null) {
+	                requiresFilter = true;
+        	        eventFilter.setTimeRange(start, end);
+        	        eventFilter.setExpandRecurringEvents(true);
+           	 }
+ 	       } catch (java.text.ParseException e) {
+        	    throw new InvalidQueryException("Error parsing time-range parameter: " + e.getMessage(), e);
+     	   }
+
+     	   try {
+   	         TimeZone tz = getTimeZoneParameter(request, "tz");
+   	         if (tz != null) {
+   	             requiresFilter = true;
+   	             eventFilter.setTimezone(tz);
+          	  }
+        	} catch (IllegalArgumentException e) {
+            	log.warn("Unrecognized time zone " + request.getParameter("tz") +
+                  	 " ... falling back to system default time zone");
+     	   }
+	
+
+
+      	  if (! requiresFilter)
+           	 return null;
+
+        	NoteItemFilter itemFilter = new NoteItemFilter();
+        	itemFilter.getStampFilters().add(eventFilter);
+
+        	return itemFilter;
+	}
+	else{/*
+		if(searchType == "bodySearch"){
+		String query = getParameter(request, "query");
+		NoteItemFilter queryFilter = new NoteItemFilter();
+		queryFilter.setBody(Restrictions.ilike(query));
+		return queryFilter;
+		*/}
+	//}
+>>>>>>> 346cec8... Figured out how to parse the HTTP request.:cosmo/src/main/java/org/osaf/cosmo/atom/provider/ItemCollectionAdapter.java
     }
     
     private boolean isCreateCollectionRequest(RequestContext request) {
