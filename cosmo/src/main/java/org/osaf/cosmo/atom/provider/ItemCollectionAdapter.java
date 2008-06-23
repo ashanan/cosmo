@@ -791,7 +791,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         EventStampFilter eventFilter = new EventStampFilter();
         String searchType = getNonEmptyParameter(request, "searchType");	
 
-        if(searchType == null){
+        if(searchType == null){ log.debug("In dateParse.");
  	       try {
 	            java.util.Date start = getDateParameter(request, "start");
         	    java.util.Date end = getDateParameter(request, "end");
@@ -832,12 +832,40 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         	return itemFilter;
 	}
 	else{
-		if(searchType == "bodySearch"){
-		String query = getNonEmptyParameter(request, "query");
-		NoteItemFilter queryFilter = new NoteItemFilter();
-		queryFilter.setBody(Restrictions.ilike(query));
-		return queryFilter;
+		if(searchType.equals("basicSearch")){
+			log.debug("In basicSearch.");
+			requiresFilter = true;
+			String query = getNonEmptyParameter(request, "query");
+			NoteItemFilter queryFilter = new NoteItemFilter();
+			queryFilter.setBody(Restrictions.ilike(query));
+			queryFilter.setDisplayName(Restrictions.like(query));
+			return queryFilter;
 		}
+		if(searchType.equals("bodySearch")){
+			log.debug("In bodySearch.");
+			requiresFilter = true;
+			String query = getNonEmptyParameter(request, "query");
+			NoteItemFilter queryFilter = new NoteItemFilter();
+			queryFilter.setBody(Restrictions.ilike(query));
+			return queryFilter;
+		}
+		else if(searchType.equals("nbodySearch")){
+			log.debug("In nbodySearch.");
+			requiresFilter = true;
+			String query = getNonEmptyParameter(request, "query");
+			NoteItemFilter queryFilter = new NoteItemFilter();
+			queryFilter.setBody(Restrictions.nilike(query));
+			return queryFilter;
+		}
+		else if(searchType.equals("titleSearch")){
+			log.debug("In titleSearch.");
+			requiresFilter = true;
+			String query = getNonEmptyParameter(request, "query");
+			NoteItemFilter queryFilter = new NoteItemFilter();
+			queryFilter.setDisplayName(Restrictions.like(query));
+			return queryFilter;
+		}
+		log.debug("searchType failed");
 		return null; //this probably needs to be replaced with some more thorough error checking
 	}
     }
