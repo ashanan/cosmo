@@ -85,7 +85,7 @@ public abstract class BaseItemFeedGenerator
         throws GeneratorException {
         Feed feed = createFeed(collection);
 
-        for (NoteItem item : findContents(collection))
+        for (NoteItem item : this.findContents(collection))
             feed.addEntry(createEntry(item));
 
         return feed;

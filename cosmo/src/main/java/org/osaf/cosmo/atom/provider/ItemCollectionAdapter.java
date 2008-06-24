@@ -84,6 +84,7 @@ import org.osaf.cosmo.model.StampUtils;
 import org.osaf.cosmo.model.UidInUseException;
 import org.osaf.cosmo.model.User;
 import org.osaf.cosmo.model.filter.EventStampFilter;
+import org.osaf.cosmo.model.filter.FilterCriteria;
 import org.osaf.cosmo.model.filter.NoteItemFilter;
 import org.osaf.cosmo.model.filter.Restrictions;
 import org.osaf.cosmo.model.text.XhtmlCollectionFormat;
@@ -359,7 +360,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
             ItemFeedGenerator generator =
                 createItemFeedGenerator(target, locator);
             generator.setFilter(createQueryFilter(request));
-
+            
             Feed feed = generator.generateFeed(collection);
 
             return ok(request, feed, collection);
@@ -789,10 +790,11 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         throws InvalidQueryException {
         boolean requiresFilter = false;
         EventStampFilter eventFilter = new EventStampFilter();
-        String searchType = getNonEmptyParameter(request, "searchType");	
+        String searchType = getNonEmptyParameter(request, "searchType");
 
-        if(searchType == null){ log.debug("In dateParse.");
- 	       try {
+        if(searchType == null){ 
+		log.debug("In dateParse.");
+		try {
 	            java.util.Date start = getDateParameter(request, "start");
         	    java.util.Date end = getDateParameter(request, "end");
 
@@ -832,7 +834,7 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
         	return itemFilter;
 	}
 	else{
-		if(searchType.equals("basicSearch")){
+		/*if(searchType.equals("basicSearch")){
 			log.debug("In basicSearch.");
 			requiresFilter = true;
 			String query = getNonEmptyParameter(request, "query");
@@ -840,13 +842,35 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
 			queryFilter.setBody(Restrictions.ilike(query));
 			queryFilter.setDisplayName(Restrictions.like(query));
 			return queryFilter;
-		}
+		}*/
 		if(searchType.equals("bodySearch")){
-			log.debug("In bodySearch.");
+			try{
+				requiresFilter = true;
+				String query = getNonEmptyParameter(request, "query");
+				log.debug("In bodySearch. " + query);
+				NoteItemFilter queryFilter = new NoteItemFilter();
+				FilterCriteria queryCriteria = Restrictions.ilike(query);
+				queryFilter.setBody(queryCriteria);
+				log.debug(queryFilter.getBody());
+				return queryFilter;
+			}
+			catch (Throwable e) { //java.lang.NullPointerException
+        	 	   throw new InvalidQueryException("Error parsing search parameter: " + e.getMessage(), e);
+     	   		}
+		}
+		else if (searchType.equals("exactSearch")){
 			requiresFilter = true;
-			String query = getNonEmptyParameter(request, "query");
+			String query;
+			String queryParse = getNonEmptyParameter(request, "query"); //query comes surrounded in quotes
+			log.debug("In exactSearch. " + queryParse);
+			if(queryParse.charAt(0) == '\"' && queryParse.charAt(queryParse.length()-1) == '\"'){
+				query = queryParse.substring(1, queryParse.length()-1);
+			}
+			else throw new InvalidQueryException("Error parsing search parameter");
+			log.debug("In exactSearch. " + query);
 			NoteItemFilter queryFilter = new NoteItemFilter();
-			queryFilter.setBody(Restrictions.ilike(query));
+			FilterCriteria queryCriteria = Restrictions.eq(query);
+			queryFilter.setBody(queryCriteria);
 			return queryFilter;
 		}
 		else if(searchType.equals("nbodySearch")){
