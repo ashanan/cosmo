@@ -87,7 +87,7 @@ dojo.declare("cosmo.ui.widget.AwesomeBox", [dijit._Widget, dijit._Templated],
 			//exact search
 			cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"exactSearch"}});
 		}
-		else cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"bodySearch"}});
+		else cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"basicSearch"}});
 	}
         else { 
 		console.log("Creating note...");

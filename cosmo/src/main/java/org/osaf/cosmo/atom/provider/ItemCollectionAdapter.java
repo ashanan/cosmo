@@ -54,6 +54,8 @@ import org.apache.commons.logging.LogFactory;
 import org.osaf.cosmo.atom.AtomConstants;
 import org.osaf.cosmo.atom.InsufficientPrivilegesException;
 import org.osaf.cosmo.atom.UidConflictException;
+import org.osaf.cosmo.atom.generator.BaseItemFeedGenerator;
+import org.osaf.cosmo.atom.generator.FullFeedGenerator;
 import org.osaf.cosmo.atom.generator.GeneratorException;
 import org.osaf.cosmo.atom.generator.ItemFeedGenerator;
 import org.osaf.cosmo.atom.generator.UnsupportedFormatException;
@@ -361,8 +363,43 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
                 createItemFeedGenerator(target, locator);
             generator.setFilter(createQueryFilter(request));
             
-            Feed feed = generator.generateFeed(collection);
-
+            //Feed feed = generator.generateFeed(collection);
+           
+            //check if it is a search
+            Feed feed;
+            String searchType = getNonEmptyParameter(request, "searchType");
+            if(searchType == null){ //not a search, continue as per usual           
+            	feed = generator.generateFeed(collection);
+            }
+            else{
+            	//CollectionItem[] collections = new CollectionItem[2];
+            	//feed = (BaseItemFeedGenerator)generator.generateFeed(collections);
+            	if(searchType.equals("basicSearch")){//coming from the quick entry bar, searches on title and body of notes only
+            		log.debug("In basicSearch.");
+        			String query = getNonEmptyParameter(request, "query");
+        			BaseItemFeedGenerator searchGenerator = (BaseItemFeedGenerator)createItemFeedGenerator(target, locator);
+        			NoteItemFilter bodyFilter = new NoteItemFilter();
+        			NoteItemFilter titleFilter = new NoteItemFilter();
+        			bodyFilter.setBody(Restrictions.ilike(query));
+        			titleFilter.setDisplayName(Restrictions.like(query));
+        			feed = searchGenerator.generateSearchFeed(collection, bodyFilter, titleFilter);
+        			/*searchGenerator.setFilter(bodyFilter);
+        			Feed searchFeed = searchGenerator.createFeed(collection);
+        			
+        	        for (NoteItem item : searchGenerator.findContents(collection))
+        	            searchFeed.addEntry(searchGenerator.createEntry(item));
+        	        searchGenerator.setFilter(titleFilter);
+        	        for (NoteItem item : searchGenerator.findContents(collection))
+        	            searchFeed.addEntry(searchGenerator.createEntry(item));
+        	        
+        	        return ok(request, searchFeed, collection);*/
+            	}
+            	else{ //coming from the the advanced search widget
+            		feed = generator.generateFeed(collection);//placeholder
+            	}
+            	
+            }
+            
             return ok(request, feed, collection);
         } catch (InvalidQueryException e) {
             return ProviderHelper.badrequest(request, e.getMessage());

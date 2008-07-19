@@ -83,11 +83,11 @@ dojo.declare("cosmo.ui.widget.AwesomeBox", [dijit._Widget, dijit._Templated],
 		console.log("In searchParse...");
 		console.log(title.slice(0,3));
 		console.log(title.substr(3));
-		if(title.charAt(3) == "\"" && title.charAt(length-1) == "\""){
+		if(title.charAt(3) == "\"" && title.charAt(title.length-1) == "\""){
 			//exact search
 			cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"exactSearch"}});
 		}
-		else cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"bodySearch"}});
+		else cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"basicSearch"}});
 	}
         else { 
 		console.log("Creating note...");
