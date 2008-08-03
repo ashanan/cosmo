@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-dojo.provide("cosmo.ui.widget.AwesomeBox");
+dojo.provide("cosmo.ui.widget.AdvancedSearch");
+dojo.require("dojo.fx");
 dojo.require("cosmo.util.html");
+dojo.require("dijit.form.TextBox");
+dojo.require("dijit.form.DateTextBox");
+dojo.require("dijit.form.TimeTextBox");
+dojo.require("dijit.form.CheckBox");
+dojo.require("dijit.form.Button");
 
-dojo.requireLocalization("cosmo.ui.widget", "AwesomeBox");
-dojo.declare("cosmo.ui.widget.AwesomeBox", [dijit._Widget, dijit._Templated],
+dojo.declare("cosmo.ui.widget.AdvancedSearch", [dijit._Widget, dijit._Templated],
 {
 
     // Processing lock to avoid duplicate items created
@@ -30,13 +35,18 @@ dojo.declare("cosmo.ui.widget.AwesomeBox", [dijit._Widget, dijit._Templated],
     l10n: null,
 
     widgetsInTemplate: true,
-    templateString: '<div class="awesomeBoxContainer">'
-        + '<input type="text" id="listViewQuickItemEntry" class="awesomeBoxTextInput inputText" dojoAttachPoint="textBox" dojoAttachEvent="onkeyup: onKeyUp"></input>'
-        + '<button id="quickEntryCreate" class="awesomeBoxButton" dojoType="dijit.form.Button" dojoAttachPoint="button" label="${l10n.submit}" dojoAttachEvent="onclick: onSubmit"></button>'
-        + '</div>',
+    templateString: '<div class="advancedSearchContainer">'
+        + '<input type="text" id="titleSearchEntry" class="searchTextInput inputText" dojoAttachPoint="textBox" dojoAttachEvent="onkeyup: onKeyUp" dojoAttachEvent="onmouseover: testAttach"></input>'
+        + '<button id="searchSubmit" class="advancedSearchButton" dojoType="dijit.form.Button" dojoAttachPoint="button" label="Search!" dojoAttachEvent="onclick: onSubmit"></button>'  
+        + '</div>', //label="${l10n.submit}"
 
     constructor: function(){
-        this.l10n = dojo.i18n.getLocalization("cosmo.ui.widget", "AwesomeBox");
+	//remember to add i18n
+        //this.l10n = dojo.i18n.getLocalization("cosmo.ui.widget", "AwesomeBox"); 
+    },
+
+    testAttach: function(){
+        console.log("test");
     },
 
     getWriteable: function(){
@@ -72,7 +82,10 @@ dojo.declare("cosmo.ui.widget.AwesomeBox", [dijit._Widget, dijit._Templated],
     },
 
     onSubmit: function () {
+        console.log("onSubmit");
+/*
         // Only submit one action at a time
+	
         if (this.isProcessing) { return false; }
         this.isProcessing = true;
         var title = this.getValue();
@@ -87,17 +100,16 @@ dojo.declare("cosmo.ui.widget.AwesomeBox", [dijit._Widget, dijit._Templated],
 			//exact search
 			cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"exactSearch"}});
 		}
-		else */
+		else *//*
 		cosmo.view.list.loadItems({noDashboard:true,searchCrit:{query:title.substr(3), searchType:"basicSearch"}});
 		//dojo.byId("listViewContainer").style.backgroundColor="red";//#f7fbff
-		this.setValue(title + "******");
 	}
         else { 
 		console.log("Creating note...");
 		console.log(title.slice(0,3));
 		console.log(title.substr(3));
 		cosmo.view.list.createNoteItem(title); 
-	}
+	}*/
     },
 
     onKeyUp: function(e){
