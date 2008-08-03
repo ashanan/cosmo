@@ -91,17 +91,18 @@ public abstract class BaseItemFeedGenerator
         return feed;
     }
 
-    public Feed generateSearchFeed(CollectionItem collection, NoteItemFilter bodyFilter, NoteItemFilter titleFilter)
+    public Feed generateSearchFeed(CollectionItem collection, NoteItemFilter[] bodyFilters, NoteItemFilter[] titleFilters)
     	throws GeneratorException {
     	Feed feed = createFeed(collection);
-    	
-    	this.setFilter(bodyFilter);
+    	for(int i = 0;i < bodyFilters.length;i++){
+    		this.setFilter(bodyFilters[i]);
 		
-        for (NoteItem item : this.findContents(collection))
-            feed.addEntry(createEntry(item));
-        this.setFilter(titleFilter);
-        for (NoteItem item : this.findContents(collection))
-            feed.addEntry(createEntry(item));
+    		for (NoteItem item : this.findContents(collection))
+    			feed.addEntry(createEntry(item));
+    		this.setFilter(titleFilters[i]);
+    		for (NoteItem item : this.findContents(collection))
+    			feed.addEntry(createEntry(item));
+    	}
     	
     	return feed;
     }

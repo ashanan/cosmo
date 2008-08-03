@@ -102,7 +102,7 @@ cosmo.view.list.loadItems = function (o) {
     // The dashboard does some strange things with filters (ignores them, mostly) so for search
     // we need to pass noDashboard:true so that we don't use the dashboard view
 	if(opts.noDashboard){
-		 deferred = cosmo.app.pim.serv.getItems(collection, opts.searchCrit, opts)
+		deferred = cosmo.app.pim.serv.getItems(collection, opts.searchCrit, opts)
 		console.log("noDashboard=true");
 	}
 	else

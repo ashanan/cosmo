@@ -359,43 +359,69 @@ public class ItemCollectionAdapter extends BaseCollectionAdapter implements Atom
 
         try {
             ServiceLocator locator = createServiceLocator(request);
-            ItemFeedGenerator generator =
-                createItemFeedGenerator(target, locator);
-            generator.setFilter(createQueryFilter(request));
-            
-            //Feed feed = generator.generateFeed(collection);
-           
-            //check if it is a search
+//          check if it is a search
             Feed feed;
             String searchType = getNonEmptyParameter(request, "searchType");
-            if(searchType == null){ //not a search, continue as per usual           
-            	feed = generator.generateFeed(collection);
-            }
+            if(searchType == null){ //not a search, continue as per usual   
+                ItemFeedGenerator generator =
+                    createItemFeedGenerator(target, locator);
+                generator.setFilter(createQueryFilter(request));
+                feed = generator.generateFeed(collection);
+            }          
             else{
-            	//CollectionItem[] collections = new CollectionItem[2];
-            	//feed = (BaseItemFeedGenerator)generator.generateFeed(collections);
             	if(searchType.equals("basicSearch")){//coming from the quick entry bar, searches on title and body of notes only
             		log.debug("In basicSearch.");
         			String query = getNonEmptyParameter(request, "query");
         			BaseItemFeedGenerator searchGenerator = (BaseItemFeedGenerator)createItemFeedGenerator(target, locator);
-        			NoteItemFilter bodyFilter = new NoteItemFilter();
-        			NoteItemFilter titleFilter = new NoteItemFilter();
-        			bodyFilter.setBody(Restrictions.ilike(query));
-        			titleFilter.setDisplayName(Restrictions.like(query));
-        			feed = searchGenerator.generateSearchFeed(collection, bodyFilter, titleFilter);
-        			/*searchGenerator.setFilter(bodyFilter);
-        			Feed searchFeed = searchGenerator.createFeed(collection);
+        			//should I all this in createrQueryFilter?
+        			//maybe I should add a createSearchQuery()
+        			String[] queryStrings = query.split("\\s");
+        			int phraseLoc, nullCount = 0;
+        			String temp;
+        			log.debug("length = " + queryStrings.length);
+        			for(int i = 0; i < queryStrings.length;i++){
+        				log.debug(queryStrings[i]);
+        				//if it starts with a quote (but doesn't end with one), its a phrase that needs to be matched
+        				if(queryStrings[i].charAt(0) == '"' && queryStrings[i].charAt(queryStrings[i].length()-1) != '"'){
+        					queryStrings[i] = queryStrings[i].substring(1); //get rid of quote
+        					phraseLoc = i;
+        					temp = queryStrings[++i];
+        					while(true){
+        						log.debug("Phrase start");
+        						if(temp.charAt(temp.length()-1) == '"' ){//ends the phrase
+        							//add string to phrase w/o quote, null current location, break
+        							queryStrings[phraseLoc] = queryStrings[phraseLoc] + " " + temp.substring(0, temp.length()-1);
+        							queryStrings[i] = null;
+        							nullCount++;
+        							log.debug("Phrase end");
+        							break;
+        						}
+        						else{//still in the phrase -- add next string to phrase, null current location
+        							queryStrings[phraseLoc] = queryStrings[phraseLoc] + " " + temp;
+        							queryStrings[i] = null;
+        							temp = queryStrings[++i];
+        							nullCount++;
+        						}
+        					}
+        				}
+        			}
         			
-        	        for (NoteItem item : searchGenerator.findContents(collection))
-        	            searchFeed.addEntry(searchGenerator.createEntry(item));
-        	        searchGenerator.setFilter(titleFilter);
-        	        for (NoteItem item : searchGenerator.findContents(collection))
-        	            searchFeed.addEntry(searchGenerator.createEntry(item));
-        	        
-        	        return ok(request, searchFeed, collection);*/
+        			int queryCount = queryStrings.length - nullCount;
+        			log.debug("nullCount = " + nullCount + ", queryCount = " + queryCount);
+        			NoteItemFilter[] bodyFilters = new NoteItemFilter[queryCount];
+        			NoteItemFilter[] titleFilters = new NoteItemFilter[queryCount];
+        			for(int j = 0;j < queryStrings.length; j++){
+        				if(queryStrings[j] != null){
+        					bodyFilters[j] = new NoteItemFilter();
+            				titleFilters[j] = new NoteItemFilter();
+        					bodyFilters[j].setBody(Restrictions.ilike(queryStrings[j]));
+        					titleFilters[j].setDisplayName(Restrictions.ilike(queryStrings[j]));
+        				}
+        			}
+        			feed = searchGenerator.generateSearchFeed(collection, bodyFilters, titleFilters);
             	}
             	else{ //coming from the the advanced search widget
-            		feed = generator.generateFeed(collection);//placeholder
+            		feed = null;//placeholder
             	}
             	
             }
